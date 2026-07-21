@@ -137,13 +137,21 @@ Nguồn sự thật nằm trong `.ai/` và được viết bằng tiếng Anh; c
 
 `./ai claude` và `./ai codex` khởi động Project Brain trước, sau đó gọi CLI tương ứng nếu đã được cài trong môi trường.
 
-### Skill discovery catalog (mới ở 1.0.7)
+### Skill discovery catalog (mới ở 1.0.8)
 
 ```bash
 ./ai skills
 ```
 
 Lệnh này sinh và hiển thị `.ai/generated/skills-catalog.md`, gồm tên skill, layer, trigger keywords và mô tả ngắn. Các layer hỗ trợ: `governance`, `development`, `operations`, `domain`.
+
+### Evidence-based recommendations (mới ở 1.0.8)
+
+```bash
+./ai recommendations
+```
+
+Lệnh này sinh và hiển thị `.ai/generated/recommended-skills.md`. Recommendation dựa trên manifest, source extension, infrastructure file và AI config an toàn; chỉ mô tả capability đã phát hiện, không suy đoán database, authentication, provider hoặc deployment.
 
 ### Skill candidate có approval riêng
 
@@ -169,9 +177,9 @@ Installer chỉ ghi trong thư mục dự án đang chọn (`--directory`, mặc
 
 ```bash
 # Đứng trong thư mục gốc của dự án cần cài.
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.7/install.sh -o /tmp/project-brain-install.sh
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.8/install.sh -o /tmp/project-brain-install.sh
 sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
-sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.7
+sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.8
 
 # Lập inventory an toàn cho các hướng dẫn AI cũ.
 ./ai onboard
