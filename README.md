@@ -137,6 +137,14 @@ Nguồn sự thật nằm trong `.ai/` và được viết bằng tiếng Anh; c
 
 `./ai claude` và `./ai codex` khởi động Project Brain trước, sau đó gọi CLI tương ứng nếu đã được cài trong môi trường.
 
+### Skill discovery catalog (mới ở 1.0.7)
+
+```bash
+./ai skills
+```
+
+Lệnh này sinh và hiển thị `.ai/generated/skills-catalog.md`, gồm tên skill, layer, trigger keywords và mô tả ngắn. Các layer hỗ trợ: `governance`, `development`, `operations`, `domain`.
+
 ### Skill candidate có approval riêng
 
 Sau khi một workflow đã được kiểm chứng, agent có thể đề xuất lưu thành skill project-local. Việc duyệt task nghiệp vụ không đồng nghĩa với duyệt skill. Trước khi tạo hoặc cập nhật skill, agent phải trình proposal đầy đủ bằng tiếng Việt; canonical `SKILL.md` luôn viết bằng tiếng Anh.
