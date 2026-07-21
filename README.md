@@ -161,9 +161,9 @@ Installer chỉ ghi trong thư mục dự án đang chọn (`--directory`, mặc
 
 ```bash
 # Đứng trong thư mục gốc của dự án cần cài.
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.6/install.sh -o /tmp/project-brain-install.sh
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.7/install.sh -o /tmp/project-brain-install.sh
 sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
-sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.6
+sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.7
 
 # Lập inventory an toàn cho các hướng dẫn AI cũ.
 ./ai onboard
