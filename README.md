@@ -1,243 +1,392 @@
 # Project Brain
 
-> **Tài liệu tiếng Việt:** Đây là entry point dành cho người dùng. Hướng dẫn canonical/internal trong `.ai/` được viết bằng tiếng Anh. Xem thêm lớp i18n tại [`docs/i18n/vi/`](docs/i18n/vi/README.md).
+[![Release](https://img.shields.io/github/v/release/Hieupt1904/project-brain-installer)](https://github.com/Hieupt1904/project-brain-installer/releases)
+[![Tests](https://img.shields.io/badge/tests-76%20passed-brightgreen)](https://github.com/Hieupt1904/project-brain-installer/releases/tag/1.0.5)
 
-Project Brain là bộ khung quản trị tri thức và quy trình cho các agent hỗ trợ phát triển phần mềm. Nó giúp Claude Code, Codex và các công cụ liên quan làm việc nhất quán qua nhiều session, dựa trên một nguồn thông tin chuẩn trong `.ai/`.
+> Bộ khung quản trị tri thức và quy trình cho AI Agent trong từng repository.
 
-> **Trạng thái hiện tại:** Repository mới có framework Project Brain; chưa có source code ứng dụng nghiệp vụ. Tên sản phẩm, mục đích nghiệp vụ, technology stack, database, authentication, API và deployment vẫn **chưa xác minh**.
+Project Brain biến một project bình thường thành project có **bộ nhớ dự án, luật làm việc, quy trình approval và quality gate** cho Claude Code, Codex, Hermes và các agent khác.
 
-## Project Brain làm gì?
+---
 
-Framework này hỗ trợ đội ngũ:
+## 📖 Project Brain là gì?
 
-- Lưu thông tin chuẩn của dự án và các quyết định đã xác nhận.
-- Tạo tóm tắt session để agent bắt đầu đúng bối cảnh.
-- Tiếp nhận và làm rõ yêu cầu trước khi thay đổi.
-- Xin phê duyệt trước các thay đổi đáng kể.
-- Phân tích ảnh hưởng tới code, dữ liệu, bảo mật, test, tài liệu và vận hành.
-- Đồng bộ hướng dẫn giữa Claude Code và Codex.
-- Phát hiện workflow có thể tái sử dụng, tạo skill candidate và chỉ promote sau approval riêng.
-- Trình proposal skill bằng tiếng Việt nhưng lưu canonical `SKILL.md` bằng tiếng Anh.
-- Chạy các quality gate và kiểm tra bảo mật ở mức repository.
-- Giữ rõ ràng ranh giới giữa thông tin đã xác minh và phần chưa biết.
+Khi dùng Claude Code, Codex hoặc Hermes trong một project, agent thường:
 
-Framework **không tự suy đoán chức năng ứng dụng**, không chứa source code nghiệp vụ trong trạng thái hiện tại và không thay thế quy trình phê duyệt production.
+- Không nhớ kiến trúc, quyết định hay quy tắc của dự án.
+- Tự ý sửa code mà không xin ý kiến.
+- Đọc nhầm secret, credential hoặc dữ liệu nhạy cảm.
+- Lặp lại sai lầm từ các session trước.
 
-## Quy ước ngôn ngữ
+**Project Brain giải quyết bằng cách:**
 
-```text
-Input gửi agent: English
-Canonical/internal instructions: English
-Output trả về người dùng: Tiếng Việt
-```
+- Lưu tri thức chuẩn của dự án trong `.ai/`.
+- Tạo session brief để agent bắt đầu đúng bối cảnh.
+- Yêu cầu approval trước các thay đổi đáng kể.
+- Quét secret, symlink và path traversal.
+- Phát hiện workflow tái sử dụng → đề xuất tạo skill (có approval riêng).
+- Chạy quality gate trước khi kết thúc.
 
-Lệnh, path, schema key và code identifier được giữ nguyên. Nội dung tiếng Việt dành cho người dùng được duy trì tại `README.md` và `docs/i18n/vi/`; nếu có sai khác về hành vi agent, canonical English trong `.ai/` là nguồn quyết định.
+---
 
-## Luồng hỗ trợ người dùng
+## 🚀 Cài đặt
 
-Một yêu cầu thay đổi đi qua các bước sau:
+### Yêu cầu
 
-```text
-Người dùng đưa yêu cầu
-        ↓
-Làm rõ mục tiêu, phạm vi và điểm chưa chắc
-        ↓
-Người dùng phê duyệt
-        ↓
-Phân tích ảnh hưởng
-        ↓
-Triển khai thay đổi đã được duyệt
-        ↓
-Kiểm chứng build/test/runtime phù hợp
-        ↓
-Cập nhật tri thức và quyết định của dự án
-        ↓
-Quality gate cuối cùng
-```
+- Python 3
+- `curl` (khi cài từ GitHub Release)
+- Linux/macOS (Windows dùng `ai.cmd`)
 
-### 1. Khởi động session
+### Cài vào project của bạn
 
 ```bash
+# Đứng trong thư mục gốc của project cần cài
+cd /path/to/your-project
+
+# Tải installer
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.5/install.sh \
+  -o /tmp/project-brain-install.sh
+
+# Xem trước những gì sẽ được cài (không ghi gì)
+sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
+
+# Cài đặt
+sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.5
+```
+
+### Sau khi cài
+
+```bash
+# Khởi tạo inventory cho hướng dẫn AI cũ (nếu có)
+./ai onboard
+
+# Tích hợp Project Brain mà không ghi đè nội dung cũ
+./ai adopt
+
+# Khởi động session
 ./ai start
 ```
 
-Lệnh này kiểm tra nhanh framework, đồng bộ adapter, quét metadata an toàn và tạo session brief.
-
-### 2. Tiếp nhận thay đổi
-
-Agent ghi nhận yêu cầu, giải thích bằng ngôn ngữ đời thường và nêu:
-
-- Hiện trạng.
-- Kết quả mong muốn.
-- Người hoặc quy trình bị ảnh hưởng.
-- Phần có thể chỉnh.
-- Những điều chưa chắc.
-
-Thay đổi đáng kể chỉ được thực hiện sau khi người dùng xác nhận phạm vi.
-
-### 3. Phân tích ảnh hưởng
-
-Agent xác định file, module, test, tài liệu, dữ liệu, tích hợp và rủi ro liên quan. Các khu vực rủi ro cao gồm database migration, authentication, authorization, data deletion, API contract, production dependency, infrastructure và external service cost.
-
-### 4. Triển khai và kiểm chứng
-
-Sau approval, agent mới triển khai trong phạm vi đã duyệt, chạy kiểm tra phù hợp và cập nhật hồ sơ thay đổi. Không chỉnh trực tiếp file generated.
-
-## Cấu trúc repository
-
-```text
-.ai/
-├── knowledge/       # Tri thức canonical của dự án
-├── policy/          # Quy tắc cốt lõi, approval và bảo mật
-├── skills/          # Skill canonical cho quy trình agent
-├── changes/         # Hồ sơ request, approval, impact và verification
-├── generated/       # Context tự sinh, có thể tái tạo
-├── runtime/         # Trạng thái tạm thời, không phải nguồn tri thức
-└── scripts/         # CLI và script quản trị
-
-.agents/skills/      # Adapter skill cho Codex
-.claude/skills/      # Adapter skill cho Claude Code
-AGENTS.md            # Adapter hướng dẫn cho Codex
-CLAUDE.md            # Adapter hướng dẫn cho Claude Code
-ai                  # Launcher Linux/macOS
-ai.cmd              # Launcher Windows
-```
-
-Nguồn sự thật nằm trong `.ai/` và được viết bằng tiếng Anh; các adapter và nội dung generated được đồng bộ hoặc tái tạo từ nguồn đó. Tài liệu tiếng Việt tại `docs/i18n/vi/` là lớp i18n dành cho người dùng.
-
-## Các lệnh thường dùng
-
-### Khởi động và xem trạng thái
+### Kiểm tra checksum (tùy chọn)
 
 ```bash
-./ai start
-./ai status
-./ai brief
+grep ARCHIVE_SHA256 /tmp/project-brain-install.sh
+sha256sum /tmp/project-brain-install.sh
 ```
+
+Installer luôn ghim SHA-256 của archive trong script. Nếu archive bị sửa, installer sẽ tự động từ chối.
+
+---
+
+## 🎯 Chọn adapter
+
+| `--target` | Cài cho | File tạo |
+|---|---|---|
+| `claude` | Claude Code | `CLAUDE.md`, `.claude/` |
+| `codex` | Codex | `AGENTS.md`, `.agents/` |
+| `both` | Cả hai | Tất cả file ở trên |
+
+```bash
+# Chỉ Claude Code
+sh /tmp/project-brain-install.sh --target claude
+
+# Chỉ Codex
+sh /tmp/project-brain-install.sh --target codex
+
+# Cả hai (mặc định)
+sh /tmp/project-brain-install.sh --target both
+```
+
+---
+
+## 📁 Cấu trúc sau khi cài
+
+```text
+your-project/
+├── .ai/
+│   ├── project.json          # Mô tả dự án, stack, test command
+│   ├── knowledge/            # Tri thức canonical (English)
+│   ├── policy/               # Quy tắc approval, bảo mật
+│   ├── skills/               # Skill canonical (English)
+│   ├── changes/              # Hồ sơ thay đổi
+│   ├── generated/            # Context tự sinh (session brief, repo map)
+│   ├── runtime/              # Trạng thái tạm thời
+│   ├── recon/                # Kết quả khảo sát repository
+│   ├── imports/              # Inventory hướng dẫn AI cũ
+│   ├── scripts/              # CLI và script quản trị
+│   └── tests/                # Test framework
+│
+├── .claude/                   # Adapter Claude Code
+├── .agents/                   # Adapter Codex
+├── CLAUDE.md
+├── AGENTS.md
+├── ai                         # Launcher Linux/macOS
+├── ai.cmd                     # Launcher Windows
+└── install.sh
+```
+
+> Nguồn sự thật nằm trong `.ai/` (English). Các adapter được sinh ra từ nguồn này.
+
+---
+
+## 🔧 Các lệnh
+
+### Khởi động và trạng thái
+
+| Lệnh | Chức năng |
+|---|---|
+| `./ai start` | Khảo sát project, tạo session brief, đồng bộ adapter |
+| `./ai status` | Xem trạng thái hiện tại |
+| `./ai brief` | Tạo session brief |
 
 ### Kiểm tra chất lượng
 
-```bash
-./ai check
-./ai doctor
-./ai close
-```
-
-- `./ai check`: chạy các lệnh build/test/lint/format đã được khai báo và kiểm tra các điều kiện của change record.
-- `./ai doctor`: kiểm tra sức khỏe framework, file bắt buộc, schema, adapter, symlink, context và secret pattern.
-- `./ai close`: quality gate trước khi kết thúc công việc.
+| Lệnh | Chức năng |
+|---|---|
+| `./ai check` | Chạy build/test/lint/format + kiểm tra change record + doc impact |
+| `./ai doctor` | Kiểm tra file bắt buộc, schema, adapter, symlink, secret, context |
+| `./ai close` | Quality gate cuối cùng trước khi kết thúc |
 
 ### Đồng bộ và chạy agent
 
-```bash
-./ai sync
-./ai claude
-./ai codex
+| Lệnh | Chức năng |
+|---|---|
+| `./ai sync` | Đồng bộ canonical skills → adapter Claude/Codex |
+| `./ai claude` | Chạy `./ai start` rồi gọi Claude Code |
+| `./ai codex` | Chạy `./ai start` rồi gọi Codex |
+
+### Skill candidate (mới ở 1.0.5)
+
+| Lệnh | Chức năng |
+|---|---|
+| `./ai skill-proposal <path>` | Hiển thị proposal tiếng Việt từ candidate draft |
+| `./ai skill-promote <path>` | Promote skill (chỉ khi có approval riêng) |
+
+### Khác
+
+| Lệnh | Chức năng |
+|---|---|
+| `./ai onboard` | Lập inventory an toàn cho hướng dẫn AI cũ |
+| `./ai adopt` | Tích hợp Project Brain mà không ghi đè file cũ |
+
+---
+
+## 🔄 Luồng vận hành
+
+```text
+Mở session
+    │
+    ├── ./ai start
+    │       ├── Quét lại source evidence
+    │       ├── Tạo recon inventory + checksum
+    │       ├── Tạo session brief
+    │       ├── Đồng bộ adapter
+    │       └── Chạy doctor nhanh
+    │
+    ├── Agent đọc session brief
+    │
+    └── User đưa yêu cầu
+            │
+            ▼
+    Làm rõ yêu cầu (tiếng Việt)
+            │
+            ▼
+    User approval
+            │
+            ▼
+    Tạo change record
+            │
+            ├── request.md
+            ├── approval.md
+            ├── scope.json
+            └── impact.md
+            │
+            ▼
+    Triển khai đúng scope
+            │
+            ▼
+    ./ai check
+            │
+            ▼
+    ./ai close
 ```
 
-`./ai claude` và `./ai codex` khởi động Project Brain trước, sau đó gọi CLI tương ứng nếu đã được cài trong môi trường.
+---
 
-### Skill candidate có approval riêng
+## 🧠 Skill Candidate Lifecycle (1.0.5)
 
-Sau khi một workflow đã được kiểm chứng, agent có thể đề xuất lưu thành skill project-local. Việc duyệt task nghiệp vụ không đồng nghĩa với duyệt skill. Trước khi tạo hoặc cập nhật skill, agent phải trình proposal đầy đủ bằng tiếng Việt; canonical `SKILL.md` luôn viết bằng tiếng Anh.
+Project Brain 1.0.5 bổ sung workflow tự động phát hiện skill phù hợp.
 
-```bash
-# Xem proposal tiếng Việt từ candidate draft.
-./ai skill-proposal .ai/skill-candidates/<candidate-id>/candidate.json
-
-# Chỉ chạy sau khi candidate có approval riêng, đúng candidate_id và content SHA-256.
-./ai skill-promote .ai/skill-candidates/<candidate-id>/candidate.json
+```text
+Workflow đã được verify
+        ↓
+Đánh giá: có tái sử dụng được không?
+        ↓
+Kiểm tra skill trùng lặp
+        ↓
+Tạo candidate draft
+        ↓
+Trình proposal đầy đủ bằng TIẾNG VIỆT
+        ↓
+User approval RIÊNG
+        ↓
+Kiểm tra candidate ID + SHA-256
+        ↓
+Promote SKILL.md bằng TIẾNG ANH
+        ↓
+./ai sync + ./ai doctor
 ```
 
-Candidate draft nằm dưới `.ai/skill-candidates/`; chỉ candidate đã được approval riêng mới được promote vào `.ai/skills/`. Workflow này không sửa global Hermes skills, memory, profiles hoặc config.
+### Quy tắc
 
-## Cài đặt và kiểm thử hiện tại
+- Proposal và approval **luôn bằng tiếng Việt**.
+- Canonical `SKILL.md` **luôn bằng tiếng Anh**.
+- Approval tạo skill **riêng biệt** với approval task nghiệp vụ.
+- Skill chỉ nằm trong `.ai/skills/` của project hiện tại.
+- Không sửa global Hermes, memory, profiles hoặc config.
 
-Framework hiện không có production dependency. Môi trường cần có Python 3 và shell trên Linux/macOS; Windows có thể dùng `ai.cmd` khi Python nằm trong `PATH`.
+---
 
-### Cài vào repository hiện có và kế thừa agent cũ
-
-Installer chỉ ghi trong thư mục dự án đang chọn (`--directory`, mặc định là thư mục hiện tại); không cài package, service hoặc cấu hình global. File dự án đang tồn tại được giữ nguyên.
-
-```bash
-# Đứng trong thư mục gốc của dự án cần cài.
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.4/install.sh -o /tmp/project-brain-install.sh
-sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
-sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.4
-
-# Lập inventory an toàn cho các hướng dẫn AI cũ.
-./ai onboard
-# Xem .ai/imports/report.md, sau đó tích hợp marker Project Brain mà không ghi đè nội dung cũ.
-./ai adopt
-```
-
-`./ai onboard` chỉ đọc các file hướng dẫn project-local được hỗ trợ như `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/skills`, Cursor và Copilot rules. Nó không đọc `.env`, credential, `.git`, symlink hoặc nội dung có secret pattern; inventory nằm tại `.ai/imports/inventory.json`.
-
-### Cài từ endpoint bên ngoài
-
-Installer bản `1.0.2` có bootstrap HTTPS và archive được kiểm tra bằng SHA-256. **Hãy tải về, kiểm tra nội dung trước khi thực thi; không pipe trực tiếp vào shell nếu chưa review.**
+## ⬆️ Nâng cấp
 
 ```bash
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.2/install.sh -o /tmp/project-brain-install.sh
-less /tmp/project-brain-install.sh
-sha256sum /tmp/project-brain-install.sh
-sh /tmp/project-brain-install.sh --dry-run --target both
-sh /tmp/project-brain-install.sh --target both --version 1.0.2
+# Xem những file sẽ được cập nhật
+sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both --version 1.0.5
+
+# Nâng cấp
+sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.5
 ```
 
-Bootstrap sẽ tải archive từ `https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.2/project-brain-1.0.2.tar.gz` và chỉ tiếp tục khi archive khớp SHA-256 đã được ghim sẵn trong script (`ARCHIVE_SHA256`). Bạn có thể xem giá trị đó bằng `grep ARCHIVE_SHA256 /tmp/project-brain-install.sh` sau khi tải về. Gỡ cài đặt không cần mạng: chạy `sh /tmp/project-brain-install.sh --uninstall` trong thư mục dự án đã cài Project Brain.
+- Installer chỉ ghi đè file do Project Brain quản lý và chưa bị sửa.
+- File đã chỉnh thủ công sẽ được giữ nguyên.
+- File mới sẽ được thêm vào manifest.
 
-Release `1.0.2` đã được publish trên GitHub với archive có checksum xác định; các asset dưới version này không được thay thế. URL bên ngoài ở trên đã được xác minh sau khi publish. Nếu muốn cài từ bản mã nguồn hiện tại, dùng local installer:
+---
+
+## 🗑️ Gỡ cài đặt
 
 ```bash
-./install.sh --dry-run --target both
-./install.sh --target both --version 1.0.2
-./install.sh --uninstall
+# Xem những gì sẽ bị xoá
+sh /tmp/project-brain-install.sh --uninstall --dry-run
+
+# Gỡ
+sh /tmp/project-brain-install.sh --uninstall
 ```
 
-Chạy test của framework:
+- Chỉ xoá file trong `.ecc/install-manifest.json`.
+- Chỉ xoá nếu checksum khớp lúc cài.
+- File đã bị sửa sẽ được giữ lại.
+- Không cần mạng.
+
+---
+
+## 🛡️ Bảo mật
+
+Project Brain thực thi các nguyên tắc:
+
+- **Không đọc** `.env`, credential, private key, `.git`, symlink.
+- **Không đưa** secret vào context hoặc generated file.
+- **Kiểm tra** secret pattern, symlink, path traversal trước mỗi thao tác.
+- **Từ chối** command chứa shell operator hoặc executable nguy hiểm.
+- **Yêu cầu approval** cho database migration, auth, data deletion, API contract, production dependency, infrastructure và skill creation.
+- **File generated** không được chỉnh trực tiếp; chỉ sửa canonical và chạy `./ai sync`.
+
+---
+
+## 🧪 Kiểm thử
 
 ```bash
 python3 -m unittest discover -s .ai/tests -p 'test_*.py'
 ```
 
-## Nguyên tắc an toàn
+Kết quả bản 1.0.5:
 
-- Không đọc hoặc đưa secret, credential, private key hay dữ liệu production vào context.
-- Không tự mở rộng phạm vi sau khi được duyệt.
-- Mọi thông tin chưa có bằng chứng phải ghi là `chưa xác minh`.
-- Kiểm tra input tại các ranh giới hệ thống khi source code ứng dụng xuất hiện.
-- Không hardcode secret.
-- Không coi file generated là nguồn chỉnh sửa chính.
-- Các thay đổi có rủi ro cao phải có phê duyệt phù hợp trước khi triển khai.
+```text
+Ran 76 tests in 0.59s
+OK
+```
 
-## Trạng thái và giới hạn xác minh
+---
 
-Đã xác minh:
+## 🔗 Dùng với Hermes Agent
 
-- Framework Project Brain trong `.ai/` đã được thiết lập và harden.
-- Các kiểm tra bắt buộc của framework đang PASS.
-- Test framework đã xác minh bằng `python3 -m unittest discover -s .ai/tests -p 'test_*.py'`.
+Hermes đọc `AGENTS.md` trong working directory, nên sau khi cài Project Brain:
 
-Chưa xác minh:
+```bash
+cd /path/to/your-project
+./ai start
+hermes
+```
 
-- Tên và mục đích của ứng dụng nghiệp vụ.
-- Source code, ngôn ngữ và framework ứng dụng.
-- Database, authentication, authorization và API.
-- Tích hợp bên ngoài, deployment và CI/CD.
-- Lệnh build, lint và format của ứng dụng.
+Hermes sẽ dùng được:
 
-Khi source code ứng dụng xuất hiện, cần cập nhật `.ai/project.json` và các tài liệu trong `.ai/knowledge/` dựa trên bằng chứng thực tế, sau đó cập nhật README này.
+- `AGENTS.md` — hướng dẫn đọc Project Brain.
+- `.ai/generated/session-brief.md` — bối cảnh dự án.
+- `.ai/knowledge/` — kiến trúc, business rules.
+- `.ai/policy/` — approval và bảo mật.
+- `.ai/skills/` — skill canonical.
+- `./ai check`, `./ai doctor`, `./ai close`.
 
-## Tài liệu liên quan
+---
 
-- [Project brief](.ai/knowledge/project-brief.md)
-- [Kiến trúc](.ai/knowledge/architecture.md)
-- [Quy tắc nghiệp vụ](.ai/knowledge/business-rules.md)
-- [Vận hành](.ai/knowledge/operations.md)
-- [Trạng thái hiện tại](.ai/knowledge/active-state.md)
-- [Các quyết định](.ai/knowledge/decisions.md)
-- [Chính sách phê duyệt](.ai/policy/approvals.md)
-- [Chính sách bảo mật](.ai/policy/security.md)
-- [Tài liệu i18n tiếng Việt](docs/i18n/vi/README.md)
-- [Luồng song ngữ cho người dùng](docs/i18n/vi/workflow.md)
+## 📋 Phiên bản
+
+| Phiên bản | Tính năng chính |
+|---|---|
+| **1.0.5** | Skill candidate lifecycle, approval-gated, CLI mới |
+| **1.0.4** | Target-aware post-install, fresh-install hardening |
+| **1.0.3** | Atomic symlink-safe manifest, malformed adopt marker fix |
+| **1.0.2** | External curl installer, SHA-256 pinned archive |
+| **1.0.1** | GitHub Release distribution |
+| **1.0.0** | Framework ban đầu |
+
+> Chính sách không thay thế: asset đã publish không bao giờ bị sửa. Bản sửa lỗi luôn publish version mới.
+
+---
+
+## ❓ Troubleshooting
+
+### Installer báo "archive checksum mismatch"
+
+Archive đã bị thay đổi sau khi publish. Tải lại installer từ GitHub Release mới nhất:
+
+```bash
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.5/install.sh \
+  -o /tmp/project-brain-install.sh
+```
+
+### `./ai doctor` báo FAIL
+
+```bash
+./ai sync
+./ai doctor
+```
+
+Nếu vẫn FAIL, đọc thông báo cụ thể trong output — mỗi check có kèm hướng dẫn sửa.
+
+### Installer báo "conflicts found"
+
+Project đã có `CLAUDE.md`, `AGENTS.md` hoặc `.ai/`. Installer không ghi đè. Chạy:
+
+```bash
+./ai onboard
+./ai adopt
+```
+
+### Skill promote báo "content hash does not match"
+
+Canonical `SKILL.md` đã đổi sau approval. Trình lại proposal tiếng Việt và xin approval mới.
+
+---
+
+## 📄 Giấy phép
+
+MIT
+
+---
+
+## 🔗 Links
+
+- **Releases:** https://github.com/Hieupt1904/project-brain-installer/releases
+- **Latest:** [1.0.5](https://github.com/Hieupt1904/project-brain-installer/releases/tag/1.0.5)
+- **Installer:** `https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.5/install.sh`
