@@ -1,0 +1,70 @@
+{
+  "schema_version": "1.0",
+  "status": "draft — requires user confirmation when application source code appears",
+  "entries": [
+    {
+      "code_path": ".ai/project.json",
+      "documentation": [
+        ".ai/knowledge/project-brief.md",
+        ".ai/knowledge/architecture.md",
+        ".ai/knowledge/business-rules.md",
+        "README.md",
+        "docs/i18n/vi/README.md"
+      ],
+      "tests": [
+        ".ai/tests/test_required_files.py",
+        ".ai/tests/test_language_contract.py"
+      ],
+      "risk": "medium",
+      "separate_approval": false
+    },
+    {
+      "code_path": ".ai/scripts/agentctl.py",
+      "documentation": [
+        ".ai/knowledge/operations.md",
+        ".ai/knowledge/architecture.md",
+        "docs/i18n/vi/workflow.md"
+      ],
+      "tests": [
+        ".ai/tests/"
+      ],
+      "risk": "high",
+      "separate_approval": false
+    },
+    {
+      "code_path": ".ai/skills/",
+      "documentation": [
+        ".ai/knowledge/operations.md",
+        ".ai/knowledge/business-rules.md",
+        "docs/i18n/vi/workflow.md"
+      ],
+      "tests": [
+        ".ai/tests/test_skill_format.py",
+        ".ai/tests/test_adapter_sync.py",
+        ".ai/tests/test_language_contract.py"
+      ],
+      "risk": "high",
+      "separate_approval": false
+    },
+    {
+      "code_path": "docs/i18n/vi/",
+      "documentation": [
+        "README.md",
+        ".ai/knowledge/architecture.md"
+      ],
+      "tests": [
+        ".ai/tests/test_language_contract.py"
+      ],
+      "risk": "low",
+      "separate_approval": false
+    },
+    {
+      "code_path": "application source (not present)",
+      "documentation": [],
+      "tests": [],
+      "risk": "unknown",
+      "separate_approval": true,
+      "no_doc_impact_reason": "No application source code is available to map."
+    }
+  ]
+}

@@ -4,9 +4,9 @@ set -eu
 umask 077
 
 BASE_URL='https://github.com/Hieupt1904/project-brain-installer/releases/download'
-VERSION='1.0.8'
-# Local 1.0.8 build placeholder; replace only during an explicit release publication.
-ARCHIVE_SHA256='d7c3820c52727c6f7d6466d864b338bf49060b0d84b13062dbfc1386ef63d467'
+VERSION='1.0.9'
+# Local 1.0.9 build checksum; update only with the matching published archive.
+ARCHIVE_SHA256='d6eec78ebbb56cc5dd388e859f3ce26f1ef01b32dd169bff2f00099fa6959de7'
 
 command -v python3 >/dev/null 2>&1 || { echo "Project Brain installer: python3 is required" >&2; exit 2; }
 

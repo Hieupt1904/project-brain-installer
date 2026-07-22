@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "project_name": "Not determined",
+  "purpose": "Project Brain and Agent Operating System for this enterprise project.",
+  "project_type": "Not determined — the repository has no business application source code.",
+  "language": [],
+  "framework": [],
+  "package_manager": null,
+  "build_commands": [],
+  "test_commands": ["python3 -m unittest discover -s .ai/tests -p 'test_*.py'"],
+  "lint_commands": [],
+  "format_commands": [],
+  "source_paths": [],
+  "test_paths": [".ai/tests"],
+  "documentation_paths": [".ai/knowledge", ".ai/policy", "docs/i18n/vi"],
+  "context_exclude_paths": [
+    ".env", ".env.*", "*.pem", "*.key", "*credential*", "*secret*",
+    ".git", ".ai/generated", ".ai/runtime", "node_modules", "vendor",
+    "dist", "build", "coverage", "__pycache__", "*.db", "*.sqlite*",
+    ".ai.backup-*", ".project-brain-backup-*", "*.backup"
+  ],
+  "high_risk_areas": [
+    "database migration", "authentication", "authorization", "data deletion",
+    "API contract", "production dependency", "infrastructure", "external service cost"
+  ],
+  "verification_status": "partial — repository had no application source code when surveyed",
+  "last_survey_scope": "Only /home/hieupt/ClaudePromt was surveyed; no business application source code is available to verify.",
+  "language_contract": {
+    "canonical_internal": "English",
+    "user_facing": "Vietnamese",
+    "i18n_layer": "docs/i18n/vi"
+  }
+}

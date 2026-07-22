@@ -1,0 +1,5 @@
+#!/usr/bin/env sh
+# Project Brain launcher for Linux/macOS.
+set -eu
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+exec python3 "$ROOT/.ai/scripts/agentctl.py" "$@"

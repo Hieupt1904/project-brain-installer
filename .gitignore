@@ -1,0 +1,20 @@
+# Project Brain generated and runtime state
+.ai/generated/
+.ai/runtime/
+
+# Secrets and local environment
+.env
+.env.*
+*.pem
+*.key
+*credential*
+*secret*
+
+# Common build/dependency output
+node_modules/
+vendor/
+dist/
+build/
+coverage/
+__pycache__/
+*.pyc
