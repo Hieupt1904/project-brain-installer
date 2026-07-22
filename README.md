@@ -2,7 +2,7 @@
 
 > **Tài liệu tiếng Việt:** Đây là entry point dành cho người dùng. Hướng dẫn canonical/internal trong `.ai/` được viết bằng tiếng Anh. Xem thêm lớp i18n tại [`docs/i18n/vi/`](docs/i18n/vi/README.md).
 
-Project Brain là bộ khung quản trị tri thức và quy trình cho các agent hỗ trợ phát triển phần mềm. Nó giúp Claude Code, Codex và các công cụ liên quan làm việc nhất quán qua nhiều session, dựa trên một nguồn thông tin chuẩn trong `.ai/`.
+Project Brain là bộ khung quản trị tri thức và quy trình cho các agent hỗ trợ phát triển phần mềm. Nó giúp Claude Code, Codex, Kiro, Hermes và adapter generic làm việc nhất quán qua nhiều session, dựa trên một nguồn thông tin chuẩn trong `.ai/`. Chọn adapter khi cài bằng `--target claude|codex|kiro|hermes|generic|all`; chạy `./ai discover` để xem verified/inferred/unknown/conflicted. Lệnh noninteractive không tự xác nhận provider/model STT/TTS.
 
 > **Trạng thái hiện tại:** Repository mới có framework Project Brain; chưa có source code ứng dụng nghiệp vụ. Tên sản phẩm, mục đích nghiệp vụ, technology stack, database, authentication, API và deployment vẫn **chưa xác minh**.
 
@@ -137,22 +137,6 @@ Nguồn sự thật nằm trong `.ai/` và được viết bằng tiếng Anh; c
 
 `./ai claude` và `./ai codex` khởi động Project Brain trước, sau đó gọi CLI tương ứng nếu đã được cài trong môi trường.
 
-### Skill discovery catalog (mới ở 1.0.8)
-
-```bash
-./ai skills
-```
-
-Lệnh này sinh và hiển thị `.ai/generated/skills-catalog.md`, gồm tên skill, layer, trigger keywords và mô tả ngắn. Các layer hỗ trợ: `governance`, `development`, `operations`, `domain`.
-
-### Evidence-based recommendations (mới ở 1.0.8)
-
-```bash
-./ai recommendations
-```
-
-Lệnh này sinh và hiển thị `.ai/generated/recommended-skills.md`. Recommendation dựa trên manifest, source extension, infrastructure file và AI config an toàn; chỉ mô tả capability đã phát hiện, không suy đoán database, authentication, provider hoặc deployment.
-
 ### Skill candidate có approval riêng
 
 Sau khi một workflow đã được kiểm chứng, agent có thể đề xuất lưu thành skill project-local. Việc duyệt task nghiệp vụ không đồng nghĩa với duyệt skill. Trước khi tạo hoặc cập nhật skill, agent phải trình proposal đầy đủ bằng tiếng Việt; canonical `SKILL.md` luôn viết bằng tiếng Anh.
@@ -171,45 +155,89 @@ Candidate draft nằm dưới `.ai/skill-candidates/`; chỉ candidate đã đư
 
 Framework hiện không có production dependency. Môi trường cần có Python 3 và shell trên Linux/macOS; Windows có thể dùng `ai.cmd` khi Python nằm trong `PATH`.
 
-### Cài vào repository hiện có và kế thừa agent cũ
+### Cài vào repository hiện có và chọn agent platform
 
-Installer chỉ ghi trong thư mục dự án đang chọn (`--directory`, mặc định là thư mục hiện tại); không cài package, service hoặc cấu hình global. File dự án đang tồn tại được giữ nguyên.
+Project Brain chỉ ghi trong thư mục dự án được chọn (`--directory`, mặc định là thư mục hiện tại). Không cài package, service, cấu hình global hoặc ghi vào `~/.hermes`. File dự án đang tồn tại được giữ nguyên.
+
+Các target được hỗ trợ:
+
+- `claude`: `CLAUDE.md`, `.claude/skills/`
+- `codex`: `AGENTS.md`, `.agents/skills/`, `.codex/` nếu dự án có sẵn
+- `kiro`: `.kiro/steering/`
+- `hermes`: `.ai/adapters/hermes/` — project-local, không sửa Hermes global
+- `generic`: `.ai/adapters/generic/`
+- `all`: tất cả adapter trên
+- `both`: alias tương thích cũ của `claude + codex`
+
+### Trạng thái phát hành
+
+Tài liệu này mô tả bản `1.0.9` đã build và verify local. Release public mới nhất hiện là `1.0.8`; không sử dụng URL `releases/download/1.0.9/...` cho đến khi release 1.0.9 được publish cùng `install.sh` và archive đã kiểm tra checksum.
+
+Để thử bản 1.0.9 từ source local đã review:
 
 ```bash
-# Đứng trong thư mục gốc của dự án cần cài.
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.8/install.sh -o /tmp/project-brain-install.sh
-sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
-sh /tmp/project-brain-install.sh --directory "$PWD" --target both --version 1.0.8
+# Kiểm tra không ghi file.
+./install.sh --dry-run --directory "$PWD" --target all
 
-# Lập inventory an toàn cho các hướng dẫn AI cũ.
+# Cài tất cả adapter.
+./install.sh --directory "$PWD" --target all --version 1.0.9
+```
+
+Cài một platform riêng từ source local:
+
+```bash
+./install.sh --directory "$PWD" --target claude --version 1.0.9
+./install.sh --directory "$PWD" --target codex --version 1.0.9
+./install.sh --directory "$PWD" --target kiro --version 1.0.9
+./install.sh --directory "$PWD" --target hermes --version 1.0.9
+./install.sh --directory "$PWD" --target generic --version 1.0.9
+```
+
+### Sau khi cài: discover dự án, không đoán model
+
+`install.sh` chỉ cài harness và file adapter. Trong dự án, chạy:
+
+```bash
+./ai discover
+```
+
+`discover` phân loại thông tin thành:
+
+- `verified`: có bằng chứng trực tiếp từ project hoặc user đã xác nhận;
+- `inferred`: dấu hiệu từ dependency/config, chưa đủ để kết luận runtime;
+- `unknown`: chưa có bằng chứng;
+- `conflicted`: các nguồn không thống nhất.
+
+Đặc biệt, Project Brain **không tự kết luận** STT/TTS provider hoặc model chỉ vì thấy `whisper`, `faster-whisper`, `MiniMax`, `OpenAI` trong dependency. Khi chạy trong terminal interactive, `./ai discover` sẽ hỏi các giá trị còn `unknown`; nhấn Enter để giữ unknown nếu chưa chắc.
+
+Sau đó tạo context cho session mới:
+
+```bash
+./ai start
+./ai doctor
+```
+
+`./ai start` re-scan evidence an toàn ở mỗi session mới. Nội dung canonical nằm trong `.ai/`; adapter chỉ là bản render cho từng platform.
+
+### Kế thừa agent cũ
+
+```bash
 ./ai onboard
-# Xem .ai/imports/report.md, sau đó tích hợp marker Project Brain mà không ghi đè nội dung cũ.
+# Xem .ai/imports/report.md rồi mới quyết định:
 ./ai adopt
 ```
 
-`./ai onboard` chỉ đọc các file hướng dẫn project-local được hỗ trợ như `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/skills`, Cursor và Copilot rules. Nó không đọc `.env`, credential, `.git`, symlink hoặc nội dung có secret pattern; inventory nằm tại `.ai/imports/inventory.json`.
+`onboard` chỉ đọc file hướng dẫn project-local được hỗ trợ như `AGENTS.md`, `CLAUDE.md`, `.claude/`, `.agents/skills`, Cursor và Copilot rules. Nó không đọc `.env`, credential, `.git`, symlink hoặc nội dung có secret pattern. `adopt` là opt-in và không ghi đè nội dung legacy.
 
-### Cài từ endpoint bên ngoài
-
-Installer bản `1.0.2` có bootstrap HTTPS và archive được kiểm tra bằng SHA-256. **Hãy tải về, kiểm tra nội dung trước khi thực thi; không pipe trực tiếp vào shell nếu chưa review.**
+### Cài từ source local hoặc gỡ cài đặt
 
 ```bash
-curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.2/install.sh -o /tmp/project-brain-install.sh
-less /tmp/project-brain-install.sh
-sha256sum /tmp/project-brain-install.sh
-sh /tmp/project-brain-install.sh --dry-run --target both
-sh /tmp/project-brain-install.sh --target both --version 1.0.2
-```
-
-Bootstrap sẽ tải archive từ `https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.2/project-brain-1.0.2.tar.gz` và chỉ tiếp tục khi archive khớp SHA-256 đã được ghim sẵn trong script (`ARCHIVE_SHA256`). Bạn có thể xem giá trị đó bằng `grep ARCHIVE_SHA256 /tmp/project-brain-install.sh` sau khi tải về. Gỡ cài đặt không cần mạng: chạy `sh /tmp/project-brain-install.sh --uninstall` trong thư mục dự án đã cài Project Brain.
-
-Release `1.0.2` đã được publish trên GitHub với archive có checksum xác định; các asset dưới version này không được thay thế. URL bên ngoài ở trên đã được xác minh sau khi publish. Nếu muốn cài từ bản mã nguồn hiện tại, dùng local installer:
-
-```bash
-./install.sh --dry-run --target both
-./install.sh --target both --version 1.0.2
+./install.sh --dry-run --target all
+./install.sh --target all --version 1.0.9
 ./install.sh --uninstall
 ```
+
+Bootstrap public tải archive `project-brain-1.0.9.tar.gz` qua HTTPS và kiểm tra SHA-256 được ghim trong `install.sh` trước khi giải nén. Release `1.0.9` là bản local đã build và verify; chỉ publish sau khi asset public được cập nhật tương ứng.
 
 Chạy test của framework:
 
