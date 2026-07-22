@@ -169,9 +169,27 @@ Các target được hỗ trợ:
 - `all`: tất cả adapter trên
 - `both`: alias tương thích cũ của `claude + codex`
 
-### Trạng thái phát hành
+### Cài nhanh release public
 
-Tài liệu này mô tả bản `1.0.9` đã build và verify local. Release public mới nhất hiện là `1.0.8`; không sử dụng URL `releases/download/1.0.9/...` cho đến khi release 1.0.9 được publish cùng `install.sh` và archive đã kiểm tra checksum.
+Release public mới nhất hiện là `1.0.8`. Đứng trong thư mục gốc của dự án cần cài, rồi chạy:
+
+```bash
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.8/install.sh | bash
+```
+
+Lệnh này cài project-local với target mặc định `both` (`claude + codex`). Muốn review trước khi chạy hoặc chọn target khác, tải script về thay vì pipe trực tiếp:
+
+```bash
+curl -fsSL https://github.com/Hieupt1904/project-brain-installer/releases/download/1.0.8/install.sh \
+  -o /tmp/project-brain-install.sh
+less /tmp/project-brain-install.sh
+sh /tmp/project-brain-install.sh --dry-run --directory "$PWD" --target both
+sh /tmp/project-brain-install.sh --directory "$PWD" --target both
+```
+
+### Trạng thái bản 1.0.9 local
+
+Tài liệu này cũng mô tả bản `1.0.9` đã build và verify local. Không sử dụng URL `releases/download/1.0.9/...` cho đến khi release 1.0.9 được publish cùng `install.sh` và archive đã kiểm tra checksum.
 
 Để thử bản 1.0.9 từ source local đã review:
 
