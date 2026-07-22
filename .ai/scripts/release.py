@@ -84,7 +84,7 @@ def main() -> None:
     """Main function to build and verify the release archive."""
     # Get the repository root (assuming this script is in .ai/scripts)
     repo_root = Path(__file__).resolve().parents[2]
-    version = "1.0.9"
+    version = "1.0.10"
     output_dir = repo_root / "dist"
 
     print(f"Building Project Brain {version} release archive...")

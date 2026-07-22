@@ -136,6 +136,22 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def is_framework_managed(name: str) -> bool:
+    """Identify Project Brain-owned implementation paths during upgrades.
+
+    User-facing entrypoints and project documentation remain protected; the
+    framework's own runtime, skills, and tests must be upgradeable even when a
+    legacy manifest did not record them correctly.
+    """
+    path = Path(name)
+    prefixes = (
+        Path(".ai/scripts"), Path(".ai/skills"), Path(".ai/tests"),
+        Path(".agents/skills"), Path(".claude/skills"),
+        Path(".kiro/steering"), Path(".ai/adapters"),
+    )
+    return any(path == prefix or prefix in path.parents for prefix in prefixes)
+
+
 def atomic_copy(source: Path, destination: Path) -> None:
     reject_symlink(source, "source file")
     reject_symlink(destination, "destination")
@@ -225,7 +241,13 @@ def install(source: Path, target: Path, selection: str, dry_run: bool, version: 
             # A previously managed, unchanged file is safe to upgrade. Any
             # project edit (including an adopted legacy file) wins and remains
             # tracked with its previous checksum so uninstall refuses deletion.
-            overwrite = name in prior_files and destination.exists() and destination.is_file() and sha256(destination) == prior_files[name]
+            overwrite = (
+                destination.exists() and destination.is_file()
+                and (
+                    (name in prior_files and sha256(destination) == prior_files[name])
+                    or is_framework_managed(name)
+                )
+            )
             if destination.exists() and not overwrite:
                 continue
             if overwrite:

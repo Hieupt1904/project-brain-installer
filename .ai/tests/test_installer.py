@@ -78,6 +78,27 @@ class TestInstaller(InstallerFixture):
         self.assertIn(".claude/settings.json", manifest["files"])
         self.assertNotIn("ai/scripts/agentctl.py", manifest["files"])
 
+    def test_legacy_manifest_upgrades_framework_but_preserves_project_files(self):
+        legacy_script = self.target / ".ai/scripts/agentctl.py"
+        legacy_script.parent.mkdir(parents=True)
+        legacy_script.write_text("legacy runtime\n", encoding="utf-8")
+        project_readme = self.target / "README.md"
+        project_readme.write_text("project-owned README\n", encoding="utf-8")
+        manifest_path = self.target / installer.MANIFEST_PATH
+        manifest_path.parent.mkdir(parents=True)
+        manifest_path.write_text(json.dumps({
+            "schema_version": installer.SCHEMA_VERSION,
+            "version": "1.0.8",
+            "selection": "both",
+            "files": {"README.md": hashlib.sha256(b"original release README\n").hexdigest()},
+            "directories": [],
+        }), encoding="utf-8")
+
+        installer.install(self.source, self.target, "both", dry_run=False, version="1.0.9")
+
+        self.assertEqual(legacy_script.read_text(encoding="utf-8"), "print('ok')\n")
+        self.assertEqual(project_readme.read_text(encoding="utf-8"), "project-owned README\n")
+
     def test_target_selection_isolated(self):
         installer.install(self.source, self.target, "claude", dry_run=False, version="dev")
 
@@ -214,7 +235,7 @@ class TestInstaller(InstallerFixture):
 class TestPublicBootstrap(InstallerFixture):
     bootstrap = Path(__file__).resolve().parents[2] / "install.sh"
 
-    def build_archive(self, path: Path, root: str = "project-brain-1.0.9", extra: tarfile.TarInfo | None = None) -> None:
+    def build_archive(self, path: Path, root: str = "project-brain-1.0.10", extra: tarfile.TarInfo | None = None) -> None:
         with tarfile.open(path, "w:gz", format=tarfile.PAX_FORMAT) as archive:
             for source in sorted(self.source.rglob("*")):
                 if source.is_file():
@@ -254,7 +275,7 @@ class TestPublicBootstrap(InstallerFixture):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.target / "CLAUDE.md").is_file())
         manifest = json.loads((self.target / installer.MANIFEST_PATH).read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "1.0.9")
+        self.assertEqual(manifest["version"], "1.0.10")
 
     def test_public_bootstrap_rejects_checksum_mismatch_before_install(self):
         archive = self.root / "payload.tar.gz"
@@ -266,7 +287,7 @@ class TestPublicBootstrap(InstallerFixture):
 
     def test_public_bootstrap_rejects_archive_link_before_install(self):
         archive = self.root / "payload.tar.gz"
-        link = tarfile.TarInfo("project-brain-1.0.9/link")
+        link = tarfile.TarInfo("project-brain-1.0.10/link")
         link.type = tarfile.SYMTYPE
         link.linkname = "CLAUDE.md"
         self.build_archive(archive, extra=link)
