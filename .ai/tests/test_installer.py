@@ -235,7 +235,7 @@ class TestInstaller(InstallerFixture):
 class TestPublicBootstrap(InstallerFixture):
     bootstrap = Path(__file__).resolve().parents[2] / "install.sh"
 
-    def build_archive(self, path: Path, root: str = "project-brain-1.0.10", extra: tarfile.TarInfo | None = None) -> None:
+    def build_archive(self, path: Path, root: str = "project-brain-1.0.11", extra: tarfile.TarInfo | None = None) -> None:
         with tarfile.open(path, "w:gz", format=tarfile.PAX_FORMAT) as archive:
             for source in sorted(self.source.rglob("*")):
                 if source.is_file():
@@ -275,7 +275,7 @@ class TestPublicBootstrap(InstallerFixture):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertTrue((self.target / "CLAUDE.md").is_file())
         manifest = json.loads((self.target / installer.MANIFEST_PATH).read_text(encoding="utf-8"))
-        self.assertEqual(manifest["version"], "1.0.10")
+        self.assertEqual(manifest["version"], "1.0.11")
 
     def test_public_bootstrap_rejects_checksum_mismatch_before_install(self):
         archive = self.root / "payload.tar.gz"
@@ -287,7 +287,7 @@ class TestPublicBootstrap(InstallerFixture):
 
     def test_public_bootstrap_rejects_archive_link_before_install(self):
         archive = self.root / "payload.tar.gz"
-        link = tarfile.TarInfo("project-brain-1.0.10/link")
+        link = tarfile.TarInfo("project-brain-1.0.11/link")
         link.type = tarfile.SYMTYPE
         link.linkname = "CLAUDE.md"
         self.build_archive(archive, extra=link)

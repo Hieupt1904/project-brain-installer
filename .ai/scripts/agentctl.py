@@ -908,15 +908,8 @@ def adapter_paths_for_target() -> list[Path]:
 
 
 def discover_facts(confirmations: dict | None = None, interactive: bool = False) -> dict:
-    """Classify evidence without turning dependency presence into runtime claims."""
-    confirmations = confirmations or {}
-    facts = {"project.root": {"status": "verified", "value": str(ROOT), "evidence": "CLI location"}}
-    for name in ("speech_to_text.provider", "speech_to_text.model", "text_to_speech.provider", "text_to_speech.model"):
-        value = confirmations.get(name)
-        if not value and interactive:
-            value = input(f"{name} đang unknown. Nhập giá trị đã xác nhận, hoặc Enter để giữ unknown: ").strip() or None
-        facts[name] = {"status": "verified" if value else "unknown", "value": value, "evidence": "project confirmation" if value else "none"}
-    return facts
+    """Return domain-neutral core facts; domain extensions opt in separately."""
+    return {"project.root": {"status": "verified", "value": str(ROOT), "evidence": "CLI location"}}
 
 
 def discover() -> int:

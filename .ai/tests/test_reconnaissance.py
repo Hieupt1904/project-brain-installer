@@ -23,8 +23,8 @@ class TestRecon(unittest.TestCase):
         self.assertNotIn(".env", [x["path"] for x in inventory["files"]])
         self.assertNotIn("super-secret-value", blob)
         self.assertNotIn("secret-model", blob)
-        self.assertEqual(facts["facts"]["tts_model"]["certainty"], "unknown")
-        self.assertEqual(facts["facts"]["stt_provider"]["certainty"], "unknown")
+        self.assertNotIn("tts_model", facts["facts"])
+        self.assertNotIn("stt_provider", facts["facts"])
 
     def test_runtime_evidence_can_verify_model_and_changed_evidence_is_revalidated(self):
         runtime = self.root / ".ai/runtime/model-evidence.json"; runtime.parent.mkdir(parents=True)
@@ -35,7 +35,7 @@ class TestRecon(unittest.TestCase):
         runtime.write_text(json.dumps({"tts_model":"other"}))
         second = json.loads(recon.reconnoitre(self.root)[2].read_text())
         self.assertEqual(second["facts"]["tts_model"]["value"], "other")
-        self.assertEqual(second["facts"]["tts_provider"]["certainty"], "unknown")
+        self.assertNotIn("tts_provider", second["facts"])
 
     def test_symlink_evidence_is_ignored(self):
         outside = self.root.parent / "outside-package.json"; outside.write_text('{"name":"outside"}')

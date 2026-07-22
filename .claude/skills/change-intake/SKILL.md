@@ -1,6 +1,6 @@
 <!-- GENERATED FILE — DO NOT EDIT DIRECTLY -->
 <!-- canonical: .ai/skills/change-intake/SKILL.md -->
-<!-- generated_at: 2026-07-22T08:07:38+00:00 -->
+<!-- generated_at: 2026-07-22T08:28:31+00:00 -->
 <!-- source_sha256: 55892dea303e27cb267cf7e0d74e2182d6aa2c05521b4335a00ec782284c205f -->
 <!-- schema_version: 1.0 -->
 

@@ -58,20 +58,15 @@ class TestTargetAwareRuntime(unittest.TestCase):
                 self.assertEqual(agentctl.active_targets(), ("kiro",))
                 self.assertEqual(agentctl.adapter_paths_for_target(), [root / ".kiro/steering/project-brain.md"])
 
-    def test_discover_noninteractive_preserves_unknown_provider(self):
+    def test_discover_is_domain_neutral_by_default(self):
         facts = agentctl.discover_facts(confirmations={}, interactive=False)
-        self.assertEqual(facts["speech_to_text.provider"]["status"], "unknown")
-        self.assertEqual(facts["text_to_speech.model"]["status"], "unknown")
-        self.assertIn("verified", {item["status"] for item in facts.values()})
+        self.assertEqual(set(facts), {"project.root"})
+        self.assertEqual(facts["project.root"]["status"], "verified")
 
-    def test_discover_interactive_prompts_for_unknown_facts(self):
-        answers = iter(["local", "large-v3", "edge", "vi-VN-HoaiMyNeural"])
-        with mock.patch("builtins.input", side_effect=lambda _prompt: next(answers)):
+    def test_discover_does_not_prompt_for_domain_specific_facts(self):
+        with mock.patch("builtins.input", side_effect=AssertionError("must not prompt")):
             facts = agentctl.discover_facts(confirmations={}, interactive=True)
-        self.assertEqual(facts["speech_to_text.provider"]["value"], "local")
-        self.assertEqual(facts["speech_to_text.model"]["value"], "large-v3")
-        self.assertEqual(facts["text_to_speech.provider"]["value"], "edge")
-        self.assertTrue(all(facts[name]["status"] == "verified" for name in facts if name != "project.root"))
+        self.assertEqual(set(facts), {"project.root"})
 
     def test_doctor_only_checks_selected_skill_adapters(self):
         with tempfile.TemporaryDirectory() as directory:

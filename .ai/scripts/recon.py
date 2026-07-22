@@ -40,16 +40,18 @@ def evidence(root: Path) -> list[dict]:
     return sorted(found, key=lambda x: x["path"])
 
 def runtime_facts(root: Path) -> dict:
+    """Load optional domain evidence only when a project explicitly provides it."""
     result = {}
     path = root / ".ai/runtime/model-evidence.json"
     if safe(path, root) and path.is_file():
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError): data = {}
-    else: data = {}
+    else: return result
     for key in ("stt_model", "stt_provider", "tts_model", "tts_provider"):
         value = data.get(key)
-        result[key] = {"value": value if isinstance(value, str) else None, "certainty": "verified" if isinstance(value, str) and value else "unknown", "evidence": ".ai/runtime/model-evidence.json" if value else None}
+        if isinstance(value, str) and value:
+            result[key] = {"value": value, "certainty": "verified", "evidence": ".ai/runtime/model-evidence.json"}
     return result
 
 def reconnoitre(root: Path) -> tuple[Path, Path, Path]:
